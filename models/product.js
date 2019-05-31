@@ -18,6 +18,7 @@ var productSchema = mongoose.Schema({
   productStatus : String,
   producerHash : String,
   productHash : String,
+  productCreationDate : Date,
   productAddressEth: String,
   producerAddressEth: String,
   productDomaine : String,
