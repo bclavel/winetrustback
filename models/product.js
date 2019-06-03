@@ -38,7 +38,7 @@ var productSchema = mongoose.Schema({
   domainUrl : String,
   domainFacebook : String,
   domainEmail : String,
-  historiquePosition : [transactionSchema]
+  historiqueTransactions : [transactionSchema]
 });
 
 // Export pour utilisation dans les routes (collection + schéma)
