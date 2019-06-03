@@ -1,15 +1,18 @@
 require('./models/bdd');
 
+var fileUpload = require('express-fileupload');
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cloudinary = require('cloudinary');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+app.use(fileUpload());
 
 app.use((req, res, next) => {
  res.header("Access-Control-Allow-Origin", '*');
@@ -35,6 +38,12 @@ app.use('/users', usersRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
+});
+
+cloudinary.config({
+  cloud_name: 'ddpbhlo3l',
+  api_key: '725222574899198',
+  api_secret: 'Q58Pa3Hrt3sXeM2hyWpBtO-YLeo'
 });
 
 // error handler
