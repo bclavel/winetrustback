@@ -71,7 +71,7 @@ router.post('/createproduct', function(req, res, next) {
 
 // route POST connexion via un compte user existant MOBILE
 router.post('/signin', (req,res,next)=> {
-  console.log('logIn is running...');
+  console.log('signin is running...');
   userModel.findOne({
     email: req.body.email,
     password: req.body.password
@@ -84,11 +84,11 @@ router.post('/signin', (req,res,next)=> {
     }
   });
 });
-// res.render? 
+
 
 // route POST création d'un nouveau User sur Mobile
 router.post('/createuser', function(req,res,next){
-  console.log('creating user is running');
+  console.log('creating user is running...');
   const newUser= new userModel({
     adress0x: req.body.adress0x,
     lastName: req.body.lastName,
@@ -98,10 +98,19 @@ router.post('/createuser', function(req,res,next){
     role: req.body.role,
     companyName: req.body.companyName,
     companyAddress: req.body.companyAddress
-  });
-  newUser.save(function(error, user){
-    console.log('creatinguser Successed')
-    res.json({result: true, user});
+  })
+  userModel.findOne({
+    email: req.body.email,
+  }, (error, data) =>{
+    if(data){
+      res.json({result: false, error})
+      console.log('user déja connu')
+    } else {
+      newUser.save(function(error, user){
+        console.log('creatinguser Successed')
+        res.json({result: true, user});
+      });
+    }
   });
 });
 
