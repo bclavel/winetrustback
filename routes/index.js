@@ -12,12 +12,6 @@ router.get('/', function(req, res, next) {
 
 
 router.post('/createproduct', function(req, res, next) {
-  // console.log('ROUTE BACK - Create product req.body', req.body);
-  // cloudinary.v2.uploader.upload(req.body.productDeskImg,
-  //   function(error, result) {
-  //     console.log('gg result !', result)
-  //     console.log('erreur gro !', error)
-  //   });
 
   var today = new Date();
 
@@ -42,8 +36,10 @@ router.post('/createproduct', function(req, res, next) {
     domainFacebook : req.body.domainFacebook,
     domainEmail : req.body.domainEmail,
   }
+  console.log('productData', productData);
 
-  var producerHash = Crypto.SHA256(productData).toString()
+  var producerHash = Crypto.SHA256(JSON.stringify(productData)).toString()
+  console.log('producerHash', producerHash);
 
   var newProductWithHash = new productModel({
     producerAddressEth : req.body.producerAddressEth,
@@ -72,7 +68,7 @@ router.post('/createproduct', function(req, res, next) {
   newProductWithHash.save(
     function (error, product) {
       console.log('INDEX BACK - New product save', product);
-      res.json({result : true, product});
+      res.json(product);
     });
   });
 
@@ -211,7 +207,6 @@ router.post('/uploadpictures', function(req, res, next) {
       function(err) {
         if (err) {
           console.log(err);
-          res.json({result: false, message: err} );
         } else {
           cloudinary.v2.uploader.upload('./public/images/'+req.files.productMobImg.name+'.'+mobileExtention,
             function(error, result) {
@@ -228,7 +223,7 @@ router.post('/uploadpictures', function(req, res, next) {
                 console.log('Produit updaté', product);
                 product.save(function (error, product) {
                   console.log('INDEX BACK - product Update save productMobImg', product);
-                  res.json({result : true, product});
+                  res.json(product);
                 })
               })
             }
@@ -239,10 +234,51 @@ router.post('/uploadpictures', function(req, res, next) {
   } else {
     console.log('pas extention, ça dégage ! ');
   }
-
-
 })
 
+router.get('/getproducts', function(req, res, next) {
+  productModel.find({ownerAddressEth : req.query.userAddress})
+  .exec(function(err, products){
+    if (products) {
+      console.log('Produits trouvés', products);
+      res.json(products);
+    } else {
+      console.log('walou pas de produit');
+      res.json({result : false, err});
+    }
+  })
+})
+
+
+router.post('/createtransact', function(req, res, next) {
+  var today = new Date();
+
+  productModel.findOne({productAddressEth : req.body.productAddressEth})
+  .exec(function(err, product){
+    if (product) {
+      console.log('Produit trouvé', product);
+      product.historiqueTransactions.push({
+        transactStatus : 'validée',
+        sellerAddressEth: req.body.sellerAddressEth,
+        sellerName : req.body.sellerName,
+        sellerPostalAddress : req.body.sellerPostalAddress,
+        transactCreationDate : today,
+        buyerAddressEth: req.body.buyerAddressEth,
+        buyerName : req.body.buyerName,
+        buyerPostalAddress : req.body.buyerPostalAddress,
+      });
+      product.save(
+        function(error, product) {
+          console.log('INDEX BACK - tranact save', product);
+          res.json({result : true, product});
+        }
+      )
+    } else {
+      console.log('walou pas de produit');
+      res.json({result : false, err});
+    }
+  })
+})
 
 
 module.exports = router;
