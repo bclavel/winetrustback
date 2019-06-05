@@ -166,7 +166,6 @@ router.post('/uploadpictures', function(req, res, next) {
       function(err) {
         if (err) {
           console.log(err);
-          res.json({result: false, message: err} );
         } else {
           cloudinary.v2.uploader.upload('./public/images/'+req.files.productDeskImg.name+'.'+desktopExtention,
             function(error, result) {
