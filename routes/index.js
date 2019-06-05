@@ -87,7 +87,7 @@ router.post('/signin', (req,res,next)=> {
     if(!data){
       res.json({result: false, isUserExist:false});
     } else {
-      res.json({result:true, isUserExist: true});
+      res.json({result:true, isUserExist: true, data});
     }
   });
 });
