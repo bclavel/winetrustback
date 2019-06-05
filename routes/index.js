@@ -121,6 +121,20 @@ router.post('/createuser', function(req,res,next){
   });
 });
 
+// route GET récupération des données produits mobile
+router.get('/getproductmobile', function(req,res,next){
+  console.log('récupération en cours...');
+  productModel.findOne({
+    producerHash: req.query.producerHash
+  }, (error, product) =>{
+    if(product){
+      res.json(product)
+      console.log('produit retrouvé')
+    } else {
+      res.json({ result: false, error})
+    }
+  })
+});
 
 router.get('/updateproduct', function(req, res, next) {
   productModel.findById(req.query.productId, function(err, product){
