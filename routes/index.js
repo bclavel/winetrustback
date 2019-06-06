@@ -250,32 +250,37 @@ router.get('/getproducts', function(req, res, next) {
 
 
 router.post('/createtransact', function(req, res, next) {
+
   var today = new Date();
 
-  productModel.findOne({productAddressEth : req.body.productAddressEth})
-  .exec(function(err, product){
-    if (product) {
-      console.log('Produit trouvé', product);
-      product.historiqueTransactions.push({
-        transactStatus : 'validée',
+  userModel.findOne({companyName: req.body.buyerName})
+  .exec(function(err, user){
+    if(user){
+
+      productModel.findOne({productAddressEth : req.body.productAddressEth})
+      .exec(function(err, product){
+        if (product) {
+        console.log('Produit trouvé', product);
+        product.historiqueTransactions.push({
+        transactStatus : 'Validation en attente',
         sellerAddressEth: req.body.sellerAddressEth,
         sellerName : req.body.sellerName,
         sellerPostalAddress : req.body.sellerPostalAddress,
         transactCreationDate : today,
-        buyerAddressEth: req.body.buyerAddressEth,
+        buyerAddressEth: user.adress0x,
         buyerName : req.body.buyerName,
-        buyerPostalAddress : req.body.buyerPostalAddress,
-      });
-      product.save(
-        function(error, product) {
-          console.log('INDEX BACK - tranact save', product);
-          res.json({result : true, product});
-        }
-      )
-    } else {
+        buyerPostalAddress : user.CompanyAddress,
+         });
+            product.save(
+              function(error, product) {
+              console.log('INDEX BACK - tranact save', product);
+              res.json({product});
+            })
+     } else {
       console.log('walou pas de produit');
       res.json({result : false, err});
     }
+  })}
   })
 })
 
