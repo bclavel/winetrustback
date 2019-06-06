@@ -248,8 +248,23 @@ router.get('/getproducts', function(req, res, next) {
   })
 })
 
+// route GET récupération des données produits desktop
+router.get('/getproductdesktop', function(req,res,next){
+  console.log('récupération en cours...');
+  productModel.findOne({
+    productAddressEth: req.query.productAddressEth
+  }, (error, product) =>{
+    if(product){
+      res.json(product)
+      console.log('produit retrouvé')
+    } else {
+      res.json({ result: false, error})
+    }
+  })
+});
 
 router.post('/createtransact', function(req, res, next) {
+  console.log('req body route create transact>>', req.body);
 
   var today = new Date();
 
@@ -283,6 +298,39 @@ router.post('/createtransact', function(req, res, next) {
   })}
   })
 })
+
+router.get('/productHash', function(req,res,next) {
+  productModel.findOne({productAddressEth: req.query.productAddressEth})
+  .exec(function(err, product){
+    if(product) {
+      console.log('Voici votre historique transact', product);
+      var productHash = Crypto.SHA256(JSON.stringify(product)).toString()
+      console.log('voici mon productHash', productHash);
+      res.json({product, productHash});
+    }
+  })
+});
+
+
+router.get('/validtransact', function(req,res,next) {
+  var todayTransac = new Date();
+  productModel.findOne({productAddressEth : req.query.productAddressEth})
+  .exec(function(err,product){
+    if(product){
+      var newProductWithHash = new productModel({
+        productHash: productHash,
+        transactAddressEth: req.query.transactAddressEth,
+        product,
+        todayTransac
+    })
+    newProductWithHash.save(
+      function (error, product) {
+        console.log('validation transaction effectuée', product);
+        res.json(product);
+      });
+    }
+  })
+});
 
 
 module.exports = router;
