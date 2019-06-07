@@ -276,6 +276,7 @@ router.post('/createtransact', function(req, res, next) {
       .exec(function(err, product){
         if (product) {
         console.log('Produit trouvé', product);
+        product.productStatus = 'transaction en cours'
         product.historiqueTransactions.push({
         transactStatus : 'Validation en attente',
         sellerAddressEth: req.body.sellerAddressEth,
@@ -288,7 +289,7 @@ router.post('/createtransact', function(req, res, next) {
          });
             product.save(
               function(error, product) {
-              console.log('INDEX BACK - tranact save', product);
+              console.log('INDEX BACK - transact save', product);
               res.json({product});
             })
      } else {
@@ -312,20 +313,23 @@ router.get('/productHash', function(req,res,next) {
 });
 
 
-router.get('/validtransact', function(req,res,next) {
-  var todayTransac = new Date();
-  productModel.findOne({productAddressEth : req.query.productAddressEth})
+router.post('/validtransact', function(req,res,next) {
+  console.log('req body route valid transact>>', req.body);
+
+  var today = new Date();
+
+  productModel.findOne({productAddressEth : req.body.productAddressEth})
   .exec(function(err,product){
     if(product){
-      var newProductWithHash = new productModel({
-        productHash: productHash,
-        transactAddressEth: req.query.transactAddressEth,
-        product,
-        todayTransac
-    })
-    newProductWithHash.save(
+      console.log('Produit trouvé', product);
+      product.historiqueTransactions[req.body.transactCount-1].transactStatus = 'validée'
+      product.historiqueTransactions[req.body.transactCount-1].transactValidationDate = today
+      product.historiqueTransactions[req.body.transactCount-1].transactProductHash = req.body.transactProductHash
+      product.transactProductHash = req.body.transactProductHash
+      product.ownerAddressEth = req.body.buyerAddress
+      product.save(
       function (error, product) {
-        console.log('validation transaction effectuée', product);
+        console.log('validation transaction save', product);
         res.json(product);
       });
     }

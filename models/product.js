@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 
 var transactionSchema = mongoose.Schema({
-  transactAddressEth: String,
+  transactProductHash: String,
   transactStatus : String,
   sellerAddressEth: String,
   sellerName : String,
