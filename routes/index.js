@@ -161,20 +161,20 @@ router.post('/uploadpictures', function(req, res, next) {
   }
 
   if(desktopExtention) {
-    req.files.productDeskImg.mv('./public/images/'+req.files.productDeskImg.name+'.'+desktopExtention,
+    req.files.productDeskImg.mv('./public/imagesdesktop/'+req.files.productDeskImg.name+'.'+desktopExtention,
 
-      function(err) {
+      async function(err) {
         if (err) {
           console.log(err);
         } else {
-          cloudinary.v2.uploader.upload('./public/images/'+req.files.productDeskImg.name+'.'+desktopExtention,
+          await cloudinary.v2.uploader.upload('./public/imagesdesktop/'+req.files.productDeskImg.name+'.'+desktopExtention,
             function(error, result) {
-              console.log('gg result !', result)
-              console.log('erreur gro !', error)
+              console.log('gg result desktop !', result)
+              console.log('erreur gro desktop !', error)
 
               productModel.findById(req.files.productDeskImg.name, function(err, product){
                 if (product) {
-                  console.log('Produit trouvé', product);
+                  console.log('Produit trouvé desktop', product);
                 } else {
                   console.log('walou pas de produit');
                 }
@@ -201,20 +201,20 @@ router.post('/uploadpictures', function(req, res, next) {
   }
 
   if(mobileExtention) {
-    req.files.productMobImg.mv('./public/images/'+req.files.productMobImg.name+'.'+mobileExtention,
+    req.files.productMobImg.mv('./public/imagesmobile/'+req.files.productMobImg.name+'.'+mobileExtention,
 
-      function(err) {
+      async function(err) {
         if (err) {
           console.log(err);
         } else {
-          cloudinary.v2.uploader.upload('./public/images/'+req.files.productMobImg.name+'.'+mobileExtention,
+          await cloudinary.v2.uploader.upload('./public/imagesmobile/'+req.files.productMobImg.name+'.'+mobileExtention,
             function(error, result) {
-              console.log('gg result !', result)
-              console.log('erreur gro !', error)
+              console.log('gg result mobile !', result)
+              console.log('erreur gro mobile !', error)
 
               productModel.findById(req.files.productMobImg.name, function(err, product){
                 if (product) {
-                  console.log('Produit trouvé', product);
+                  console.log('Produit trouvé mobile', product);
                 } else {
                   console.log('walou pas de produit');
                 }
@@ -236,7 +236,8 @@ router.post('/uploadpictures', function(req, res, next) {
 })
 
 router.get('/getproducts', function(req, res, next) {
-  productModel.find({ownerAddressEth : req.query.userAddress})
+  productModel.find()
+  .or([{ownerAddressEth : req.query.userAddress}, {lastBuyerAddressEth : req.query.userAddress}])
   .exec(function(err, products){
     if (products) {
       console.log('Produits trouvés', products);
@@ -276,12 +277,14 @@ router.post('/createtransact', function(req, res, next) {
       .exec(function(err, product){
         if (product) {
         console.log('Produit trouvé', product);
-        product.productStatus = 'transaction en cours'
+        product.productStatus = 'transaction en cours';
+        product.lastBuyerAddressEth = user.adress0x;
+        product.lastTransactCreationDate = today;
         product.historiqueTransactions.push({
         transactStatus : 'Validation en attente',
         sellerAddressEth: req.body.sellerAddressEth,
         sellerName : req.body.sellerName,
-        sellerPostalAddress : req.body.sellerPostalAddress,
+        buyerPostalAddress : user.companyAddress,
         transactCreationDate : today,
         buyerAddressEth: user.adress0x,
         buyerName : req.body.buyerName,
@@ -327,6 +330,7 @@ router.post('/validtransact', function(req,res,next) {
       product.historiqueTransactions[req.body.transactCount-1].transactProductHash = req.body.transactProductHash
       product.transactProductHash = req.body.transactProductHash
       product.ownerAddressEth = req.body.buyerAddress
+      product.productStatus = 'en stock'
       product.save(
       function (error, product) {
         console.log('validation transaction save', product);

@@ -6,15 +6,17 @@ var transactionSchema = mongoose.Schema({
   sellerAddressEth: String,
   sellerName : String,
   sellerPostalAddress : String,
-  transactCreationDate : String,
+  transactCreationDate : Date,
   buyerAddressEth: String,
   buyerName : String,
   buyerPostalAddress : String,
-  transactValidationDate : String,
+  transactValidationDate : Date,
 })
 
 var productSchema = mongoose.Schema({
   ownerAddressEth: String,
+  lastBuyerAddressEth : String,
+  lastTransactCreationDate : Date,
   productStatus : String,
   producerHash : String,
   productHash : String,
